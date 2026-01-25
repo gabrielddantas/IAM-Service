@@ -5,4 +5,225 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["accounts", "systems", "permissions", "logs"]
+}
+
+model Account {
+  id         BigInt    @id @default(autoincrement()) @map("id")
+  enrollment BigInt    @unique @map("cd_enrollment")
+  name       String    @map("tx_name") @db.VarChar(255)
+  email      String    @unique @map("tx_email") @db.VarChar(255)
+  password   String    @map("tx_password") @db.VarChar(255)
+  active     Boolean   @default(true) @map("bl_active")
+  createdAt  DateTime  @default(now()) @map("dt_created_at")
+  updatedAt  DateTime? @updatedAt @map("dt_updated_at")
+  deletedAt  DateTime? @map("dt_deleted_at")
+
+  accountSystems AccountSystem[]
+  accountRoles   AccountRole[]
+
+  @@index([email], name: "idx_tb_account_tx_email")
+  @@index([enrollment], name: "idx_tb_account_cd_enrollment")
+  @@index([enrollment, active], name: "idx_tb_account_cd_enrollment_bl_active")
+  @@map("tb_account")
+  @@schema("accounts")
+}
+
+model AccountSystem {
+  accountId BigInt @map("id_account")
+  systemId  BigInt @map("id_system")
+  metadata  Json?  @map("js_metadata")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  system  System  @relation(fields: [systemId], references: [id], onDelete: Cascade)
+
+  @@id([accountId, systemId])
+  @@map("tb_account_system")
+  @@schema("accounts")
+}
+
+model AccountRole {
+  accountId BigInt @map("id_account")
+  roleId    BigInt @map("id_role")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  role    Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([accountId, roleId])
+  @@map("tb_account_role")
+  @@schema("accounts")
+}
+
+model System {
+  id          BigInt    @id @default(autoincrement()) @map("id")
+  systemKey   String    @unique @map("tx_system_key") @db.VarChar(32)
+  name        String    @unique @map("tx_name") @db.VarChar(255)
+  description String?   @map("tx_description") @db.VarChar(500)
+  active      Boolean   @default(true) @map("bl_active")
+  createdAt   DateTime  @default(now()) @map("dt_created_at")
+  updatedAt   DateTime? @updatedAt @map("dt_updated_at")
+  deletedAt   DateTime? @map("dt_deleted_at")
+
+  systemConfigs  SystemConfig?
+  roles          Role[]
+  resources      Resource[]
+  accountSystems AccountSystem[]
+
+  @@index([name], name: "idx_tb_system_tx_name")
+  @@index([systemKey], name: "idx_tb_system_tx_system_key")
+  @@index([systemKey, active], name: "idx_tb_system_tx_system_key_bl_active")
+  @@map("tb_system")
+  @@schema("systems")
+}
+
+model SystemConfig {
+  id                  BigInt    @id @default(autoincrement()) @map("id")
+  systemId            BigInt    @unique @map("id_system")
+  tokenKey            String    @unique @map("tx_token_key") @db.VarChar(255)
+  expirationTime      Int       @map("vl_expiration_time")
+  complementaryConfig Json?     @map("js_complementary_config")
+  createdAt           DateTime  @default(now()) @map("dt_created_at")
+  updatedAt           DateTime? @updatedAt @map("dt_updated_at")
+
+  system System @relation(fields: [systemId], references: [id], onDelete: Cascade)
+
+  @@map("tb_system_config")
+  @@schema("systems")
+}
+
+model Role {
+  id          BigInt    @id @default(autoincrement()) @map("id")
+  name        String    @map("tx_name") @db.VarChar(255)
+  description String?   @map("tx_description") @db.VarChar(500)
+  active      Boolean   @default(true) @map("bl_active")
+  systemId    BigInt    @map("id_system")
+  createdAt   DateTime  @default(now()) @map("dt_created_at")
+  updatedAt   DateTime? @updatedAt @map("dt_updated_at")
+  deletedAt   DateTime? @map("dt_deleted_at")
+
+  system        System         @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  roleResources roleResource[]
+  accountRoles  AccountRole[]
+
+  @@unique([name, systemId], name: "uq_tb_role_tx_name_id_system")
+  @@index([name], name: "idx_tb_role_tx_name")
+  @@index([systemId], name: "idx_tb_role_id_system")
+  @@index([name, systemId], name: "idx_tb_role_tx_name_id_system")
+  @@map("tb_role")
+  @@schema("permissions")
+}
+
+model roleResource {
+  roleId     BigInt @map("id_role")
+  resourceId BigInt @map("id_resource")
+
+  role     Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, resourceId])
+  @@map("tb_role_resource")
+  @@schema("permissions")
+}
+
+model Resource {
+  id             BigInt    @id @default(autoincrement()) @map("id")
+  systemId       BigInt    @map("id_system")
+  resourceTypeId BigInt    @map("id_resource_type")
+  code           String    @unique @map("tx_code") @db.VarChar(255)
+  description    String?   @map("tx_description") @db.VarChar(500)
+  active         Boolean   @default(true) @map("bl_active")
+  path           String    @map("tx_path") @db.VarChar(500)
+  pathRegex      String    @map("tx_path_regex") @db.VarChar(500)
+  method         String    @map("tx_method") @db.VarChar(10)
+  createdAt      DateTime  @default(now()) @map("dt_created_at")
+  updatedAt      DateTime? @updatedAt @map("dt_updated_at")
+  deletedAt      DateTime? @map("dt_deleted_at")
+
+  system        System         @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  resourceType  ResourceType   @relation(fields: [resourceTypeId], references: [id], onDelete: NoAction)
+  roleResources roleResource[]
+
+  @@unique([path, method, systemId], name: "uq_tb_resource_tx_path_tx_method_id_system")
+  @@index([code], name: "idx_tb_resource_tx_code")
+  @@index([systemId], name: "idx_tb_resource_id_system")
+  @@index([resourceTypeId], name: "idx_tb_resource_id_resource_type")
+  @@map("tb_resource")
+  @@schema("permissions")
+}
+
+model ResourceType {
+  id           BigInt    @id @default(autoincrement()) @map("id")
+  resourceName String    @unique @map("tx_resource_name") @db.VarChar(255)
+  description  String    @map("tx_description") @db.VarChar(500)
+  createdAt    DateTime  @default(now()) @map("dt_created_at")
+  updatedAt    DateTime? @updatedAt @map("dt_updated_at")
+
+  resources Resource[]
+
+  @@index([resourceName], name: "idx_tb_resource_type_tx_resource_name")
+  @@map("tb_resource_type")
+  @@schema("permissions")
+}
+
+model AuditLog {
+  id               BigInt          @id @default(autoincrement()) @map("id")
+  accountId        BigInt          @map("id_account")
+  systemId         BigInt          @map("id_system")
+  actionType       AuditActionType @map("tx_action_type")
+  tableName        String          @map("tx_table_name") @db.VarChar(255)
+  recordAffectedId BigInt          @map("id_record_affected")
+  oldValue         Json            @map("js_old_value")
+  newValue         Json            @map("js_new_value")
+  ipAddress        String?         @map("tx_ip_address") @db.VarChar(255)
+  createdAt        DateTime        @default(now()) @map("dt_created_at")
+
+  @@index([accountId], name: "idx_tb_audit_log_id_account")
+  @@index([systemId], name: "idx_tb_audit_log_id_system")
+  @@index([tableName], name: "idx_tb_audit_log_tx_table_name")
+  @@index([recordAffectedId], name: "idx_tb_audit_log_id_record_affected")
+  @@index([accountId, systemId], name: "idx_tb_audit_log_id_account_id_system")
+  @@index([tableName, recordAffectedId], name: "idx_tb_audit_log_tx_table_name_id_record_affected")
+  @@index([accountId, systemId, tableName], name: "idx_tb_audit_log_id_account_id_system_tx_table_name")
+  @@map("tb_audit_log")
+  @@schema("logs")
+}
+
+enum AuditActionType {
+  CREATED
+  UPDATED
+  DELETED
+
+  @@map("enum_action_type")
+  @@schema("logs")
+}
+
+model AccessLog {
+  id             BigInt                  @id @default(autoincrement()) @map("id")
+  accountId      BigInt                  @map("id_account")
+  systemId       BigInt                  @map("id_system")
+  resourceId     BigInt                  @map("id_resource")
+  success        Boolean                 @map("bl_success")
+  failureReason  AccessLogFailureReason? @map("tx_failure_reason")
+  failureMessage String?                 @map("tx_failure_message") @db.VarChar(1000)
+  ipAddress      String?                 @map("tx_ip_address") @db.VarChar(255)
+  createdAt      DateTime                @default(now()) @map("dt_created_at")
+
+  @@index([accountId], name: "idx_tb_access_log_id_account")
+  @@index([systemId], name: "idx_tb_access_log_id_system")
+  @@index([resourceId], name: "idx_tb_access_log_id_resource")
+  @@index([accountId, systemId], name: "idx_tb_access_log_id_account_id_system")
+  @@index([systemId, resourceId], name: "idx_tb_access_log_id_system_id_resource")
+  @@map("tb_access_log")
+  @@schema("logs")
+}
+
+enum AccessLogFailureReason {
+  INVALID_CREDENTIALS
+  INACTIVE_ACCOUNT
+  INACTIVE_SYSTEM
+  INACTIVE_RESOURCE
+  INSUFFICIENT_PERMISSIONS
+
+  @@map("enum_failure_reason")
+  @@schema("logs")
 }
