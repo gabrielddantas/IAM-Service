@@ -102,7 +102,7 @@ model Role {
   deletedAt   DateTime? @map("dt_deleted_at")
 
   system        System         @relation(fields: [systemId], references: [id], onDelete: Cascade)
-  roleResources roleResource[]
+  roleResources RoleResource[]
   accountRoles  AccountRole[]
 
   @@unique([name, systemId], name: "uq_tb_role_tx_name_id_system")
@@ -113,7 +113,7 @@ model Role {
   @@schema("permissions")
 }
 
-model roleResource {
+model RoleResource {
   roleId     BigInt @map("id_role")
   resourceId BigInt @map("id_resource")
 
@@ -141,7 +141,7 @@ model Resource {
 
   system        System         @relation(fields: [systemId], references: [id], onDelete: Cascade)
   resourceType  ResourceType   @relation(fields: [resourceTypeId], references: [id], onDelete: NoAction)
-  roleResources roleResource[]
+  roleResources RoleResource[]
 
   @@unique([path, method, systemId], name: "uq_tb_resource_tx_path_tx_method_id_system")
   @@index([code], name: "idx_tb_resource_tx_code")
