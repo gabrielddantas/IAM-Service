@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "npm run db:migrate && npm run db:generate && node --watch ./src/index.ts",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:create": "prisma migrate dev --create-only",
     "db:generate": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
