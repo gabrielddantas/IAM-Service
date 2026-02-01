@@ -15,7 +15,6 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/joi": "^17.2.2",
     "@types/node": "^25.0.10",
@@ -28,7 +27,8 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
-    "bcrypt": "^6.0.0",
+    "@types/argon2": "^0.14.1",
+    "argon2": "^0.44.0",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "joi": "^18.0.2",

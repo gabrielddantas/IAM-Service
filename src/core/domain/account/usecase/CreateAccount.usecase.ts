@@ -88,6 +88,12 @@ export class CreateAccountUseCase implements UseCase<
       );
     }
 
+    if (password.length > PASSWORD_REQUIREMENTS.maxLength.length) {
+      throw new PasswordRequirementsExceptions(
+        `Password must be at most ${PASSWORD_REQUIREMENTS.maxLength.length} characters long`,
+      );
+    }
+
     const upperCaseMatches =
       password.match(PASSWORD_REQUIREMENTS.minUpperCase.regex) || [];
     if (upperCaseMatches.length < PASSWORD_REQUIREMENTS.minUpperCase.length) {
