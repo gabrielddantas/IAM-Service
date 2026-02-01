@@ -4,20 +4,16 @@ import { BusinessException } from "@/core/shared/error/BusinessException.error";
 import { ErrorResponse } from "@/infrastructure/shared/model/ErrorResponse.model";
 import { DateUtilities } from "@/core/shared/utils/DateUtilities.utils";
 import { LoggerFactory } from "@/infrastructure/libs/logger/LoggerFactory.lib";
-import { Logger } from "@/core/shared/gateway/Logger.gateway";
 import { ErrorDetails } from "@/core/shared/model/ErrorDetails.model";
 
 export class ErrorHandlerMiddleware {
-  private logger: Logger;
-
-  public constructor() {
-    this.logger = LoggerFactory.createLogger(ErrorHandlerMiddleware.name);
-  }
+  public constructor() {}
 
   public handle(error: any, response: Response, path: string): void {
-    const errorResponse = this.buildErrorResponse(error, path);
+    const logger = LoggerFactory.createLogger(this.getOrigin(error));
 
-    this.logger.error(errorResponse.message);
+    const errorResponse = this.buildErrorResponse(error, path);
+    logger.error(errorResponse.message);
 
     response.status(errorResponse.status).json(errorResponse.toJSON());
   }

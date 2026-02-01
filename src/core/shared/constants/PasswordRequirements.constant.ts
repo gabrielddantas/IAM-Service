@@ -1,6 +1,6 @@
 export const PASSWORD_REQUIREMENTS = {
   minLength: {
-    length: 5,
+    length: 8,
   },
   minUpperCase: {
     length: 1,

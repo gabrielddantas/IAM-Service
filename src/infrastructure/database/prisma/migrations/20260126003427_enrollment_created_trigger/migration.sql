@@ -6,11 +6,14 @@ RETURNS TRIGGER AS $$
 DECLARE
     v_today TEXT := to_char(now(), 'YYYYMMDD');
     v_last_enrollment TEXT;
+    v_lock_id CONSTANT BIGINT := 123456789;
 BEGIN
+    PERFORM pg_advisory_xact_lock(v_lock_id);
+
     SELECT MAX(cd_enrollment)::text INTO v_last_enrollment FROM accounts.tb_account;
 
     IF v_last_enrollment IS NULL OR LEFT(v_last_enrollment, 8) <> v_today THEN
-        EXECUTE 'ALTER SEQUENCE accounts.enrollment_daily_seq RESTART WITH 1';
+        ALTER SEQUENCE accounts.enrollment_daily_seq RESTART WITH 1;
     END IF;
 
     NEW.cd_enrollment := (v_today || lpad(nextval('accounts.enrollment_daily_seq')::text, 4, '0'))::bigint;

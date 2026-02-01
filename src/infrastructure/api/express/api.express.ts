@@ -1,6 +1,5 @@
 import { Router } from "@/infrastructure/shared/interface/Router.interface";
 import { Api } from "@/infrastructure/shared/interface/API.interface";
-import { Logger } from "@/core/shared/gateway/Logger.gateway";
 import { ErrorHandlerMiddleware } from "@/infrastructure/api/express/middleware/ErrorHandler.middleware";
 import express, { Express, NextFunction, Request, Response } from "express";
 

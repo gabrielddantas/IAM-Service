@@ -31,10 +31,8 @@ export class AccountValidationImpl implements AccountValidationGateway {
         }),
       password: joi
         .string()
-        .min(5)
         .required()
         .messages({
-          "string.min": ErrorMessages.MIN_LENGTH_NOT_MET("password", 5),
           "any.required": ErrorMessages.REQUIRED_FIELD("password"),
           "string.empty": ErrorMessages.REQUIRED_FIELD("password"),
         }),

@@ -14,10 +14,6 @@ export abstract class AccountRouter implements Router {
     version: string = "v1",
     path: string = "",
   ) {
-    if (path === null) {
-      path = "";
-    }
-
     this.path = `/${version}${this.BASE_PATH}${path}`;
     this.method = method;
   }
