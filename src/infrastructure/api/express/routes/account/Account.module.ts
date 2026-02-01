@@ -1,7 +1,7 @@
 import { CreateAccountUseCase } from "@/core/domain/account/usecase/CreateAccount.usecase";
 import { CreateAccountController } from "@/infrastructure/api/express/routes/account/post/CreateAccount/CreateAccount.controller";
 import { Router } from "@/infrastructure/shared/interface/Router.interface";
-import { AccountRepositoryImpl } from "@/infrastructure/database/repository/implementation/AccountRespository.impl";
+import { AccountRepositoryImpl } from "@/infrastructure/database/repository/implementation/AccountRepository.impl";
 import { prismaAdapter } from "@/infrastructure/libs/database/PrismaAdapter.lib";
 import { HashManager } from "@/core/shared/gateway/HashManager.gateway";
 import { AccountRepository } from "@/core/domain/account/gateway/AccountRepository.gateway";
