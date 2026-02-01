@@ -6,4 +6,4 @@ node_modules
 dist
 
 # Ignore prisma generated files
-src/infrastructure/database/generated/
+src/infrastructure/database/prisma/generated/

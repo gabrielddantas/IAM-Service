@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run db:migrate && npm run db:generate && node --watch ./src/index.ts",
+    "dev": "npm run db:migrate && npm run db:generate && tsx --watch ./src/index.ts",
     "db:migrate": "prisma migrate dev",
     "db:migrate:create": "prisma migrate dev --create-only",
     "db:generate": "prisma generate",
@@ -15,8 +15,12 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^5.0.6",
+    "@types/joi": "^17.2.2",
     "@types/node": "^25.0.10",
     "@types/pg": "^8.16.0",
+    "@types/winston": "^2.4.4",
     "prisma": "^7.3.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
@@ -24,7 +28,11 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
-    "pg": "^8.17.2"
+    "express": "^5.2.1",
+    "joi": "^18.0.2",
+    "pg": "^8.17.2",
+    "winston": "^3.19.0"
   }
 }
