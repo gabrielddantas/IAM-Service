@@ -1,10 +1,11 @@
 import { Response } from "express";
-import { FieldsContentValidationError } from "@/core/shared/error/FieldsContentValidation.error";
+import { FieldsContentValidationException } from "@/core/shared/error/FieldsContentValidationException.error";
 import { BusinessException } from "@/core/shared/error/BusinessException.error";
 import { ErrorResponse } from "@/infrastructure/shared/model/ErrorResponse.model";
 import { DateUtilities } from "@/core/shared/utils/DateUtilities.utils";
 import { LoggerFactory } from "@/infrastructure/libs/logger/LoggerFactory.lib";
 import { ErrorDetails } from "@/core/shared/model/ErrorDetails.model";
+import { HttpProtocols } from "@/core/shared/constants/HttpProtocols.constant";
 
 export class ErrorHandlerMiddleware {
   public constructor() {}
@@ -19,13 +20,13 @@ export class ErrorHandlerMiddleware {
   }
 
   private buildErrorResponse(error: any, path: string): ErrorResponse {
-    if (error instanceof FieldsContentValidationError) {
-      const fieldsError = error as FieldsContentValidationError;
+    if (error instanceof FieldsContentValidationException) {
+      const fieldsError = error as FieldsContentValidationException;
 
       return ErrorResponse.builder({
         status: fieldsError.statusCode,
         message: fieldsError.message,
-        fieldsErrors: fieldsError.getErrors().getErrors(),
+        fieldsErrors: fieldsError.getErrors(),
         details: fieldsError.details,
         timestamp: DateUtilities.getCurrentBrazilianTimestamp(),
         path,
@@ -46,7 +47,7 @@ export class ErrorHandlerMiddleware {
 
     console.log(error);
     return ErrorResponse.builder({
-      status: 500,
+      status: HttpProtocols.HTTP_STATUS_RETURN.INTERNAL_SERVER_ERROR,
       message: "An unexpected error occurred, try again later.",
       details: ErrorDetails.builder({
         code: "INTERNAL_SERVER_ERROR",
@@ -58,8 +59,14 @@ export class ErrorHandlerMiddleware {
   }
 
   private getOrigin(error: any): string {
+    const UNKNOWN_ORIGIN = "Unknown Origin";
     const stack = error.stack as string;
+
+    if (!error || !error.stack) {
+      return UNKNOWN_ORIGIN;
+    }
+
     const stackLines = stack.split("\n");
-    return stackLines[1]?.trim().split(" ")[1] || "Unknown Origin";
+    return stackLines[1]?.trim().split(" ")[1] || UNKNOWN_ORIGIN;
   }
 }

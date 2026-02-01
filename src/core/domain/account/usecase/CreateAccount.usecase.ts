@@ -7,10 +7,13 @@ import { AccountRepository } from "@/core/domain/account/gateway/AccountReposito
 import { UniqueConstraintException } from "@/core/shared/error/UniqueConstraintException.error";
 import { UseCase } from "@/core/shared/interface/UseCase.interface";
 import { AccountValidationGateway } from "@/core/domain/account/gateway/AccountValidation.gateway";
-import { FieldsContentValidationError } from "@/core/shared/error/FieldsContentValidation.error";
+import { FieldsContentValidationException } from "@/core/shared/error/FieldsContentValidationException.error";
 import { ErrorDetails } from "@/core/shared/model/ErrorDetails.model";
 
-export class CreateAccountUseCase implements UseCase<AccountEntity, void> {
+export class CreateAccountUseCase implements UseCase<
+  AccountEntity,
+  AccountEntity
+> {
   public constructor(
     private readonly accountRepository: AccountRepository,
     private readonly logger: Logger,
@@ -18,7 +21,7 @@ export class CreateAccountUseCase implements UseCase<AccountEntity, void> {
     private readonly accountValidation: AccountValidationGateway,
   ) {}
 
-  public async execute(accountBody: AccountEntity): Promise<void> {
+  public async execute(accountBody: AccountEntity): Promise<AccountEntity> {
     this.logger.info("Starting to create a new account");
 
     this.validateContentFields(accountBody);
@@ -26,8 +29,11 @@ export class CreateAccountUseCase implements UseCase<AccountEntity, void> {
     await this.validateUniqueDatabaseFields(accountBody);
     await this.hashPassword(accountBody);
 
-    await this.accountRepository.createAccount(accountBody);
+    const createdAccount =
+      await this.accountRepository.createAccount(accountBody);
+
     this.logger.info("New account created successfully");
+    return createdAccount;
   }
 
   private async hashPassword(accountBody: AccountEntity): Promise<void> {
@@ -44,7 +50,7 @@ export class CreateAccountUseCase implements UseCase<AccountEntity, void> {
       this.accountValidation.isCreateAccountDataValid(accountData);
 
     if (validationErrors.hasErrors()) {
-      throw new FieldsContentValidationError(validationErrors);
+      throw new FieldsContentValidationException(validationErrors);
     }
 
     this.logger.info("Content fields validated successfully");
@@ -55,19 +61,17 @@ export class CreateAccountUseCase implements UseCase<AccountEntity, void> {
   ): Promise<void> {
     this.logger.info("Validating unique fields for the new account");
 
-    const existingAccount =
-      await this.accountRepository.findByEnrollmentOrEmail(
-        accountData.enrollment!,
-        accountData.email!,
-      );
+    const existingAccount = await this.accountRepository.findByEmail(
+      accountData.email!,
+    );
 
     if (existingAccount) {
       throw new UniqueConstraintException(
-        "Account with the same enrollment or email already exists",
+        "Account with the same email already exists",
         ErrorDetails.builder({
-          code: "ACCOUNT_EMAIL_OR_ENROLLMENT_UNIQUE_CONSTRAINT_VIOLATION",
+          code: "ACCOUNT_EMAIL_UNIQUE_CONSTRAINT_VIOLATION",
           message:
-            "An account with the provided enrollment or email already exists in the system.",
+            "An account with the provided email already exists in the system.",
         }),
       );
     }

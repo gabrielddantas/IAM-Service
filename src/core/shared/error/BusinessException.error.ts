@@ -1,3 +1,4 @@
+import { HttpProtocols } from "@/core/shared/constants/HttpProtocols.constant";
 import { ErrorDetails } from "@/core/shared/model/ErrorDetails.model";
 
 export class BusinessException extends Error {
@@ -6,7 +7,7 @@ export class BusinessException extends Error {
 
   public constructor(
     message: string,
-    statusCode: number = 400,
+    statusCode: number = HttpProtocols.HTTP_STATUS_RETURN.BAD_REQUEST,
     details: ErrorDetails,
   ) {
     super(message);

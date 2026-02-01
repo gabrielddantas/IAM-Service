@@ -1,4 +1,5 @@
 import { CreateAccountUseCase } from "@/core/domain/account/usecase/CreateAccount.usecase";
+import { HttpProtocols } from "@/core/shared/constants/HttpProtocols.constant";
 import { Logger } from "@/core/shared/gateway/Logger.gateway";
 import { AccountRouter } from "@/infrastructure/api/express/routes/account/AccountRouter.interface";
 import { CreateAccountMapper } from "@/infrastructure/api/express/routes/account/post/CreateAccount/CreateAccount.mapper";
@@ -9,7 +10,7 @@ export class CreateAccountController extends AccountRouter {
     private readonly createAccountUseCase: CreateAccountUseCase,
     private readonly logger: Logger,
   ) {
-    super("post");
+    super(HttpProtocols.HTTP_METHODS.POST);
   }
 
   async execute(request: Request, response: Response): Promise<void> {
@@ -21,9 +22,12 @@ export class CreateAccountController extends AccountRouter {
       password: request.body.password,
     });
 
-    await this.createAccountUseCase.execute(requestBodyEntity);
+    const createdAccount =
+      await this.createAccountUseCase.execute(requestBodyEntity);
 
     this.logger.info("Account created successfully");
-    response.status(201).send();
+    response
+      .status(HttpProtocols.HTTP_STATUS_RETURN.CREATED)
+      .json(CreateAccountMapper.toResponse(createdAccount));
   }
 }

@@ -6,8 +6,10 @@ RETURNS TRIGGER AS $$
 DECLARE
     v_today TEXT := to_char(now(), 'YYYYMMDD');
     v_last_enrollment TEXT;
-    v_lock_id CONSTANT BIGINT := 123456789;
+    v_lock_id BIGINT;
 BEGIN
+
+    v_lock_id := hashtext('accounts.fn_generate_enrollment')::bigint;
     PERFORM pg_advisory_xact_lock(v_lock_id);
 
     SELECT MAX(cd_enrollment)::text INTO v_last_enrollment FROM accounts.tb_account;

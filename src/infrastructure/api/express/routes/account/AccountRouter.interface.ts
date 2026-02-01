@@ -1,7 +1,5 @@
-import {
-  Router,
-  HttpMethod,
-} from "@/infrastructure/shared/interface/Router.interface";
+import { HttpMethod } from "@/core/shared/types/HttpMethods.type";
+import { Router } from "@/infrastructure/shared/interface/Router.interface";
 import { Request, Response } from "express";
 
 export abstract class AccountRouter implements Router {

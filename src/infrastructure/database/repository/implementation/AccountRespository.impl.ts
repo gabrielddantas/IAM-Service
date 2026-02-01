@@ -6,11 +6,13 @@ import { AccountRepositoryMapper } from "@/infrastructure/database/repository/ma
 export class AccountRepositoryImpl implements AccountRepository {
   public constructor(private readonly prisma: PrismaClient) {}
 
-  async createAccount(accountData: AccountEntity): Promise<void> {
+  async createAccount(accountData: AccountEntity): Promise<AccountEntity> {
     const createModel = AccountRepositoryMapper.toCreateModel(accountData);
-    await this.prisma.account.create({
+    const result = await this.prisma.account.create({
       data: createModel,
     });
+
+    return AccountRepositoryMapper.toDomain(result);
   }
 
   async findLastAccount(): Promise<AccountEntity | null> {
@@ -27,13 +29,10 @@ export class AccountRepositoryImpl implements AccountRepository {
     return AccountRepositoryMapper.toDomain(account);
   }
 
-  async findByEnrollmentOrEmail(
-    enrollment: bigint,
-    email: string,
-  ): Promise<AccountEntity | null> {
+  async findByEmail(email: string): Promise<AccountEntity | null> {
     const account = await this.prisma.account.findFirst({
       where: {
-        OR: [{ enrollment }, { email }],
+        email,
       },
     });
 

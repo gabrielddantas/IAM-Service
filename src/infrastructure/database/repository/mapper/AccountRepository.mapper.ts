@@ -9,11 +9,10 @@ export class AccountRepositoryMapper {
       enrollment: accountModel.enrollment,
       name: accountModel.name,
       email: accountModel.email,
-      password: accountModel.password,
       active: accountModel.active,
       createdAt: accountModel.createdAt,
-      updatedAt: accountModel.updatedAt || new Date(),
-      deletedAt: accountModel.deletedAt || new Date(),
+      updatedAt: accountModel.updatedAt || undefined,
+      deletedAt: accountModel.deletedAt || undefined,
     });
   }
 
@@ -28,8 +27,8 @@ export class AccountRepositoryMapper {
       password: accountEntity.password!,
       active: accountEntity.active,
       createdAt: accountEntity.createdAt,
-      updatedAt: accountEntity.updatedAt,
-      deletedAt: accountEntity.deletedAt,
+      updatedAt: accountEntity.updatedAt || undefined,
+      deletedAt: accountEntity.deletedAt || undefined,
     };
   }
 }

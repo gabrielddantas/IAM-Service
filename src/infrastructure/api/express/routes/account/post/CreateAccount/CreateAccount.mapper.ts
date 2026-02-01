@@ -14,4 +14,19 @@ export class CreateAccountMapper {
       password: requestBody.password,
     });
   }
+
+  public static toResponse(
+    accountEntity: AccountEntity,
+  ): Record<string, unknown> {
+    return {
+      id: accountEntity.id?.toString(),
+      enrollment: accountEntity.enrollment!.toString(),
+      name: accountEntity.name,
+      email: accountEntity.email,
+      active: accountEntity.active,
+      createdAt: accountEntity.createdAt,
+      updatedAt: accountEntity.updatedAt,
+      deletedAt: accountEntity.deletedAt,
+    };
+  }
 }
