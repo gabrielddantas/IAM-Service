@@ -50,7 +50,7 @@ export class ApiExpress implements Api {
         Promise.resolve(handler(request, response)).catch(next);
       };
 
-      this.app[method](this.BASE_PATH + path, wrappedHandler);
+      (this.app as any)[method](this.BASE_PATH + path, wrappedHandler);
     });
   }
 
