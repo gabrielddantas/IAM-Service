@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "./generated/prisma"
 }
 
 datasource db {
@@ -10,7 +10,7 @@ datasource db {
 
 model Account {
   id         BigInt    @id @default(autoincrement()) @map("id")
-  enrollment BigInt    @unique @map("cd_enrollment")
+  enrollment BigInt    @unique @default(dbgenerated()) @map("cd_enrollment")
   name       String    @map("tx_name") @db.VarChar(255)
   email      String    @unique @map("tx_email") @db.VarChar(255)
   password   String    @map("tx_password") @db.VarChar(255)
